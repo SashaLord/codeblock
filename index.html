@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeBlock</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>CodeBlock</h1>
+
+    <div class="container">
+        <div class="panel">
+            <h2>📦 Блоки</h2>
+            <div class="block-palette">
+                <div class="palette-block block-declaration"    draggable="true" data-type="declaration">Объявление переменной</div>
+                <div class="palette-block block-assign" draggable="true" data-type="assign">Присваивание</div>
+                <div class="palette-block block-print"  draggable="true" data-type="print">Вывод</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Рабочая область</h2>
+            <div class="workspace" id="workspace">
+                <div class="workspace-empty">Перетащите блоки сюда →</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>▶️ Управление</h2>
+            <div class="controls">
+                <button class="btn btn-run"   id="runBtn">▶ Запустить</button>
+                <button class="btn btn-clear" id="clearBtn">🗑️ Очистить</button>
+            </div>
+            <h2>Вывод</h2>
+            <div class="output-box" id="output"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
