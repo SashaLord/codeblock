@@ -65,6 +65,7 @@ h2 {
 .block-declaration    { background: #f59e0b; }
 .block-assign { background: #10b981; }
 .block-print  { background: #8b5cf6; }
+.block-condition_if  { background: #3b82f6; }
 
 .workspace {
     background: #f8fafc;
@@ -98,6 +99,7 @@ h2 {
 .workspace-block.declaration-block    { border-left-color: #f59e0b; }
 .workspace-block.assign-block { border-left-color: #10b981; }
 .workspace-block.print-block  { border-left-color: #8b5cf6; }
+.workspace-block.condition_if-block  { border-left-color: #3b82f6; }
 
 .block-header {
     display: flex;
@@ -164,4 +166,50 @@ h2 {
     white-space: pre-wrap;
     font-size: 0.9em;
     line-height: 1.6;
+}
+
+.if-condition {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
+
+.if-input {
+    flex: 1;
+    margin-top: 0;
+    min-width: 0;
+}
+
+.block-select {
+    flex: 0 0 56px;
+    padding: 8px 4px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.95em;
+    text-align: center;
+    cursor: pointer;
+    background: white;
+}
+
+.block-select:focus {
+    outline: none;
+    border-color: #e2e8f0;
+}
+
+.if-body {
+    background: white;
+    border: 2px solid #5392f1;
+    border-radius: 8px;
+    min-height: 60px;
+    padding: 12px;
+}
+
+.if-body-empty {
+    color: #64748b;
+    font-size: 0.9em;
+    text-align: center;
+    padding: 8px 0;
+    pointer-events: none;
 }

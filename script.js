@@ -1,7 +1,7 @@
 let workspace = [];
 
 
-const blockTemplates = {
+const blocks = {
     declaration: {
         title: 'Объявление переменной',
         fields: [
@@ -20,8 +20,14 @@ const blockTemplates = {
         fields: [
             { key: 'value', placeholder: 'Что вывести' }
         ]
+    },
+    condition_if: {
+        title: 'If',
+        fields: []
     }
 };
+
+const operators = ['>', '<', '=', '!=', '>=', '<='];
 
 function initializeDragAndDrop() {
     document.querySelectorAll('.palette-block').forEach(block => {
@@ -30,21 +36,31 @@ function initializeDragAndDrop() {
         });
     });
 
-    const workspaceEl = document.getElementById('workspace');
+    setupDropZone(document.getElementById('workspace'), workspace);
+}
 
-    workspaceEl.addEventListener('dragover', (e) => {
-        e.preventDefault();
-    });
-    workspaceEl.addEventListener('drop', (e) => {
-        e.preventDefault();
+function setupDropZone(workspaceElement, list) {
+    workspaceElement.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
+    workspaceElement.addEventListener('drop', (e) => {
+        e.preventDefault();e.stopPropagation();
         const blockType = e.dataTransfer.getData('blockType');
-        if (blockType) addBlock(blockType);
+        if (!blockType) return;
+        if (blockType === 'condition_if') {
+            list.push({ type: 'condition_if', data: { left: '', op: '>', right: '' }, body: [] });
+        } else {
+            list.push({ type: blockType, data: {} });
+        }
+        renderWorkspace();
     });
 }
 
 
 function addBlock(type) {
-    workspace.push({ type, data: {} });
+    if (type === 'condition_if') {
+        workspace.push({ type, data: { left: '', op: '>', right: '' }, body: [] });
+    } else {
+        workspace.push({ type, data: {} });
+    }
     renderWorkspace();
 }
 
@@ -64,25 +80,38 @@ function clearWorkspace() {
 }
 
 function renderWorkspace() {
-    const workspaceEl = document.getElementById('workspace');
-    const empty = workspaceEl.querySelector('.workspace-empty');
+    const workspaceElement = document.getElementById('workspace');
+    const empty = workspaceElement.querySelector('.workspace-empty');
     if (empty) empty.style.display = workspace.length > 0 ? 'none' : 'block';
 
-    workspaceEl.querySelectorAll('.workspace-block').forEach(b => b.remove());
+    workspaceElement.querySelectorAll('.workspace-block').forEach(b => b.remove());
     workspace.forEach((block, index) => {
-        workspaceEl.appendChild(createBlockElement(block, index));
+        workspaceElement.appendChild(createBlockElement(block, index));
+    });
+
+    document.querySelectorAll('.if-body').forEach(el => {
+        const index = parseInt(el.dataset.ifIndex);
+        setupDropZone(el, workspace[index].body);
     });
 }
 
-function createBlockElement(block, index) {
-    const template = blockTemplates[block.type];
+function createBlockElement(block, index, parentIndex = null) {
+    const template = blocks[block.type];
     const div = document.createElement('div');
     div.className = `workspace-block ${block.type}-block`;
+
+    const deleteCall = parentIndex !== null
+        ? `deleteNestedBlock(${parentIndex}, ${index})`
+        : `deleteBlock(${index})`;
+
+    const updateCall = (key) => parentIndex !== null
+        ? `updateNestedBlockData(${parentIndex}, ${index}, '${key}', this.value)`
+        : `updateBlockData(${index}, '${key}', this.value)`;
 
     let content = `
         <div class="block-header">
             <span class="block-title">${template.title}</span>
-            <button class="block-delete" onclick="deleteBlock(${index})">×</button>
+            <button class="block-delete" onclick="${deleteCall}">×</button>
         </div>
     `;
 
@@ -91,14 +120,53 @@ function createBlockElement(block, index) {
             <input class="block-input" type="text" 
                    placeholder="${field.placeholder}"
                    value="${block.data[field.key] || ''}"
-                   onchange="updateBlockData(${index}, '${field.key}', this.value)">
+                   onchange="${updateCall(field.key)}">
         `;
     });
+
+
+    if (block.type === 'condition_if') {
+    const opOptions = operators.map(op =>
+        `<option value="${op}" ${block.data.op === op ? 'selected' : ''}>${op}</option>`
+    ).join('');
+
+    const bodyHTML = block.body.length === 0
+        ? '<div class="if-body-empty">Перетащите блоки сюда</div>'
+        : block.body.map((child, ci) =>
+            createBlockElement(child, ci, index).outerHTML
+          ).join('');
+
+    content += `
+        <div class="if-condition">
+            <input class="block-input if-input" type="text"
+                   value="${block.data.left || ''}"
+                   onchange="${updateCall('left')}">
+            <select class="block-select"
+                    onchange="${updateCall('op')}">
+                ${opOptions}
+            </select>
+            <input class="block-input if-input" type="text"
+                   value="${block.data.right || ''}"
+                   onchange="${updateCall('right')}">
+        </div>
+        <div class="if-body" data-if-index="${index}">
+            ${bodyHTML}
+        </div>
+    `;
+}
 
     div.innerHTML = content;
     return div;
 }
 
+function deleteNestedBlock(ifIndex, childIndex) {
+    workspace[ifIndex].body.splice(childIndex, 1);
+    renderWorkspace();
+}
+
+function updateNestedBlockData(ifIndex, childIndex, field, value) {
+    workspace[ifIndex].body[childIndex].data[field] = value;
+}
 
 function parser(src) {
     let i = 0;
@@ -195,7 +263,6 @@ function buildAST(blocks) {
                 break;
             }
 
-
             case 'print': {
                 const value = block.data.value || '';
                 if (!value) throw new Error('Блок "Вывод": не указано значение');
@@ -205,6 +272,20 @@ function buildAST(blocks) {
                 } else {
                     body.push({ type: 'Print', expr: parser(value) });
                 }
+                break;
+            }
+
+            case 'condition_if': {
+                const left = (block.data.left  || '');
+                const right = (block.data.right || '');
+                const op = block.data.op || '>';
+                if (!left)  throw new Error('Блок "if": нет левой части');
+                if (!right) throw new Error('Блок "if": нет правой части');
+                body.push({
+                    type: 'If',
+                    condition: { op, left: parser(left), right: parser(right) },
+                    body: buildAST(block.body).body
+                });
                 break;
             }
         }
@@ -249,15 +330,13 @@ function evalExpression(node, vars) {
 }
 
 
-function interpretAST(ast) {
-    const vars   = {};
-    const output = [];
-
-    for (const node of ast.body) {
+function interpret(nodes, vars, output) {
+    for (const node of nodes) {
         switch (node.type) {
             case 'Declaration':
                 vars[node.name] = 0;
                 break;
+
             case 'Assign':
                 if (!(node.target in vars))
                     throw new Error(`Переменная '${node.target}' не объявлена`);
@@ -267,12 +346,32 @@ function interpretAST(ast) {
             case 'Print':
                 output.push(evalExpression(node.expr, vars));
                 break;
+
+            case 'If':
+                if (evalCondition(node.condition, vars)) {
+                    interpret(node.body, vars, output);
+                }
+                break;
         }
     }
+}
 
+function interpretAST(ast) {
+    const vars = {}, output = [];
+    interpret(ast.body, vars, output);
     return { output, vars };
 }
 
+function evalCondition(condition, vars) {
+    const a = evalExpression(condition.left,  vars);
+    const b = evalExpression(condition.right, vars);
+    if (condition.op === '>') return a > b;
+    if (condition.op === '<') return a < b;
+    if (condition.op === '=') return a === b;
+    if (condition.op === '!=') return a !== b;
+    if (condition.op === '>=') return a >= b;
+    if (condition.op === '<=') return a <= b;
+}
 
 function runProgram() {
     const outputEl = document.getElementById('output');
