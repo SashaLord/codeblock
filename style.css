@@ -66,6 +66,7 @@ h2 {
 .block-assign { background: #10b981; }
 .block-print  { background: #8b5cf6; }
 .block-condition_if  { background: #3b82f6; }
+.block-while { background: #f43f5e; }
 
 .workspace {
     background: #f8fafc;
@@ -96,6 +97,7 @@ h2 {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+.workspace-block.while-block { border-left-color: #f43f5e; }
 .workspace-block.declaration-block    { border-left-color: #f59e0b; }
 .workspace-block.assign-block { border-left-color: #10b981; }
 .workspace-block.print-block  { border-left-color: #8b5cf6; }
@@ -212,4 +214,12 @@ h2 {
     text-align: center;
     padding: 8px 0;
     pointer-events: none;
+}
+
+.while-body {
+    background: white;
+    border: 2px solid #f43f5e;
+    border-radius: 8px;
+    min-height: 60px;
+    padding: 12px;
 }

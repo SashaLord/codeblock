@@ -1,7 +1,7 @@
 let workspace = [];
 
 
-const blocks = {
+const block_types = {
     declaration: {
         title: 'Объявление переменной',
         fields: [
@@ -24,6 +24,10 @@ const blocks = {
     condition_if: {
         title: 'If',
         fields: []
+    },
+    while: {
+        title: 'While',
+        fields: []
     }
 };
 
@@ -41,13 +45,13 @@ function initializeDragAndDrop() {
 
 function setupDropZone(workspaceElement, list) {
     workspaceElement.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
-    workspaceElement.addEventListener('drop', (e) => {
-        e.preventDefault();e.stopPropagation();
+    workspaceElement.addEventListener('drop', (e) => { e.preventDefault();e.stopPropagation();
         const blockType = e.dataTransfer.getData('blockType');
         if (!blockType) return;
-        if (blockType === 'condition_if') {
-            list.push({ type: 'condition_if', data: { left: '', op: '>', right: '' }, body: [] });
-        } else {
+        if (blockType === 'condition_if' || blockType === 'while') {
+            list.push({ type: blockType, data: { left: '', op: '>', right: '' }, body: [] });
+        }
+         else {
             list.push({ type: blockType, data: {} });
         }
         renderWorkspace();
@@ -56,7 +60,7 @@ function setupDropZone(workspaceElement, list) {
 
 
 function addBlock(type) {
-    if (type === 'condition_if') {
+    if (type === 'condition_if' || type === 'while') {
         workspace.push({ type, data: { left: '', op: '>', right: '' }, body: [] });
     } else {
         workspace.push({ type, data: {} });
@@ -93,10 +97,14 @@ function renderWorkspace() {
         const index = parseInt(el.dataset.ifIndex);
         setupDropZone(el, workspace[index].body);
     });
+    document.querySelectorAll('.while-body').forEach(el => {
+    const index = parseInt(el.dataset.whileIndex);
+    setupDropZone(el, workspace[index].body);
+});
 }
 
 function createBlockElement(block, index, parentIndex = null) {
-    const template = blocks[block.type];
+    const template = block_types[block.type];
     const div = document.createElement('div');
     div.className = `workspace-block ${block.type}-block`;
 
@@ -125,7 +133,7 @@ function createBlockElement(block, index, parentIndex = null) {
     });
 
 
-    if (block.type === 'condition_if') {
+    if (block.type === 'condition_if' || block.type === 'while') {
     const opOptions = operators.map(op =>
         `<option value="${op}" ${block.data.op === op ? 'selected' : ''}>${op}</option>`
     ).join('');
@@ -149,7 +157,8 @@ function createBlockElement(block, index, parentIndex = null) {
                    value="${block.data.right || ''}"
                    onchange="${updateCall('right')}">
         </div>
-        <div class="if-body" data-if-index="${index}">
+        <div class="${block.type === 'condition_if' ? 'if-body' : 'while-body'}" 
+        data-${block.type === 'condition_if' ? 'if' : 'while'}-index="${index}">
             ${bodyHTML}
         </div>
     `;
@@ -288,6 +297,19 @@ function buildAST(blocks) {
                 });
                 break;
             }
+            case 'while': {
+                const left  = (block.data.left  || '');
+                const right = (block.data.right || '');
+                const op    =  block.data.op || '>';
+                if (!left)  throw new Error('Блок "while": нет левой части');
+                if (!right) throw new Error('Блок "while": нет правой части');
+                body.push({
+                    type: 'While',
+                    condition: { op, left: parser(left), right: parser(right) },
+                    body: buildAST(block.body).body
+                });
+                break;
+}
         }
     }
 
@@ -352,6 +374,11 @@ function interpret(nodes, vars, output) {
                     interpret(node.body, vars, output);
                 }
                 break;
+            case 'While':
+                while (evalCondition(node.condition, vars)) {
+                    interpret(node.body, vars, output);
+                }
+    break;
         }
     }
 }
