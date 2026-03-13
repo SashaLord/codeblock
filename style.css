@@ -67,6 +67,12 @@ h2 {
 .block-print  { background: #8b5cf6; }
 .block-condition_if  { background: #3b82f6; }
 .block-while { background: #f43f5e; }
+<<<<<<< HEAD
+.block-array_declare { background: #0ea5e9; }
+.block-array_set     { background: #14b8a6; }
+.block-array_get     { background: #6366f1; }
+=======
+>>>>>>> d7e791068ffad6ff582c2dd0c40157e95411d146
 
 .workspace {
     background: #f8fafc;
@@ -102,6 +108,9 @@ h2 {
 .workspace-block.assign-block { border-left-color: #10b981; }
 .workspace-block.print-block  { border-left-color: #8b5cf6; }
 .workspace-block.condition_if-block  { border-left-color: #3b82f6; }
+.workspace-block.array_declare-block { border-left-color: #0ea5e9; }
+.workspace-block.array_set-block     { border-left-color: #14b8a6; }
+.workspace-block.array_get-block     { border-left-color: #6366f1; }
 
 .block-header {
     display: flex;
@@ -120,6 +129,7 @@ h2 {
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.85em;
+    margin-top: 4px;
 }
 
 .block-delete:hover { background: #dc2626; }
@@ -157,6 +167,7 @@ h2 {
 .btn:active { box-shadow: none; }
 .btn-run    { background: #10b981; color: white; }
 .btn-clear  { background: #ef4444; color: white; }
+.btn-bubblesort {background: #a604a6;color: white;width: 100%;}
 
 .output-box {
     background: #1e293b;
@@ -222,4 +233,34 @@ h2 {
     border-radius: 8px;
     min-height: 60px;
     padding: 12px;
+<<<<<<< HEAD
+}
+
+.else-add {
+    display: block;
+    margin-top: 8px;
+    padding: 4px 10px;
+    border: 2px solid #3b82f6;
+    border-radius: 6px;
+    color: #3b82f6;
+    cursor: pointer;
+    font-size: 0.85em;
+}
+
+.else-add:hover { background: #eff6ff; }
+
+.else-label {
+    font-weight: 600;
+    color: black;
+    font-size: 16px;
+    margin: 8px 0 4px;
+}
+
+.else-body {
+    border: 2px solid #ff0000;
+    border-radius: 8px;
+    min-height: 60px;
+    padding: 12px;
+=======
+>>>>>>> d7e791068ffad6ff582c2dd0c40157e95411d146
 }
