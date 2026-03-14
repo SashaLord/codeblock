@@ -26,7 +26,6 @@ const block_types = {
         fields: []
     },
     while: {
-<<<<<<< HEAD
     title: 'While',
     fields: []
     },
@@ -52,10 +51,6 @@ const block_types = {
             { key: 'name',   placeholder: 'Имя массива' },
             { key: 'index',  placeholder: 'Индекс' }
         ]
-=======
-        title: 'While',
-        fields: []
->>>>>>> d7e791068ffad6ff582c2dd0c40157e95411d146
     }
 };
 
@@ -72,7 +67,6 @@ function initializeDragAndDrop() {
 }
 
 function setupDropZone(workspaceElement, list) {
-<<<<<<< HEAD
     workspaceElement.addEventListener('dragover', (e) => { e.preventDefault(); });
     workspaceElement.addEventListener('drop', (e) => { e.preventDefault();e.stopPropagation();
         const blockType = e.dataTransfer.getData('blockType');
@@ -82,16 +76,6 @@ function setupDropZone(workspaceElement, list) {
         else if (blockType === 'while')
             list.push({ type: blockType, data: { left: '', op: '>', right: '' }, body: [] });
         else
-=======
-    workspaceElement.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
-    workspaceElement.addEventListener('drop', (e) => { e.preventDefault();e.stopPropagation();
-        const blockType = e.dataTransfer.getData('blockType');
-        if (!blockType) return;
-        if (blockType === 'condition_if' || blockType === 'while') {
-            list.push({ type: blockType, data: { left: '', op: '>', right: '' }, body: [] });
-        }
-         else {
->>>>>>> d7e791068ffad6ff582c2dd0c40157e95411d146
             list.push({ type: blockType, data: {} });
         renderWorkspace();
     });
@@ -99,13 +83,9 @@ function setupDropZone(workspaceElement, list) {
 
 
 function addBlock(type) {
-<<<<<<< HEAD
     if (type === 'condition_if')
         workspace.push({ type, data: { left: '', op: '>', right: '' }, body: [], elseBody: null});
     else if (type === 'while') 
-=======
-    if (type === 'condition_if' || type === 'while') {
->>>>>>> d7e791068ffad6ff582c2dd0c40157e95411d146
         workspace.push({ type, data: { left: '', op: '>', right: '' }, body: [] });
     else 
         workspace.push({ type, data: {} });
@@ -127,24 +107,9 @@ function renderWorkspace() {
     workspace.forEach((block, index) => {
         workspaceElement.appendChild(createBlockElement(block, index));
     });
-<<<<<<< HEAD
 }
 
 function createBlockElement(block, path) {
-=======
-
-    document.querySelectorAll('.if-body').forEach(el => {
-        const index = parseInt(el.dataset.ifIndex);
-        setupDropZone(el, workspace[index].body);
-    });
-    document.querySelectorAll('.while-body').forEach(el => {
-    const index = parseInt(el.dataset.whileIndex);
-    setupDropZone(el, workspace[index].body);
-});
-}
-
-function createBlockElement(block, index, parentIndex = null) {
->>>>>>> d7e791068ffad6ff582c2dd0c40157e95411d146
     const template = block_types[block.type];
     const div = document.createElement('div');
     div.className = `workspace-block ${block.type}-block`;
@@ -213,13 +178,7 @@ function createBlockElement(block, index, parentIndex = null) {
                    value="${block.data.right || ''}"
                    onchange="${updateCall('right')}">
         </div>
-<<<<<<< HEAD
         <div class="${bodyClass}" data-body-path="${path}">${bodyHTML}
-=======
-        <div class="${block.type === 'condition_if' ? 'if-body' : 'while-body'}" 
-        data-${block.type === 'condition_if' ? 'if' : 'while'}-index="${index}">
-            ${bodyHTML}
->>>>>>> d7e791068ffad6ff582c2dd0c40157e95411d146
         </div>
         ${elseSection}
     `;
@@ -457,7 +416,6 @@ function buildAST(blocks) {
                 });
                 break;
             }
-<<<<<<< HEAD
             case 'array_declare': {
                 const name = block.data.name || '';
                 const size = block.data.size || '';
@@ -498,24 +456,6 @@ function buildAST(blocks) {
                 body.push({ type: 'ArrayGet', target, name, indexExpr: parser(index) });
                 break;
             }}}
-=======
-            case 'while': {
-                const left  = (block.data.left  || '');
-                const right = (block.data.right || '');
-                const op    =  block.data.op || '>';
-                if (!left)  throw new Error('Блок "while": нет левой части');
-                if (!right) throw new Error('Блок "while": нет правой части');
-                body.push({
-                    type: 'While',
-                    condition: { op, left: parser(left), right: parser(right) },
-                    body: buildAST(block.body).body
-                });
-                break;
-}
-        }
-    }
-
->>>>>>> d7e791068ffad6ff582c2dd0c40157e95411d146
     return { type: 'Program', body };
 }
 
@@ -597,7 +537,6 @@ function interpret(nodes, vars, output) {
                 else if (node.elseBody !== null)
                     interpret(node.elseBody, vars, output);
                 break;
-<<<<<<< HEAD
 
             case 'While':
                 while (evalCondition(node.condition, vars))
@@ -640,14 +579,6 @@ function interpret(nodes, vars, output) {
                 vars[node.target] = vars[node.name][index];
                 break;
             }}
-=======
-            case 'While':
-                while (evalCondition(node.condition, vars)) {
-                    interpret(node.body, vars, output);
-                }
-    break;
-        }
->>>>>>> d7e791068ffad6ff582c2dd0c40157e95411d146
     }
 }
 
